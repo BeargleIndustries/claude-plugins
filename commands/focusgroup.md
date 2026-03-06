@@ -31,7 +31,8 @@ Extract from `{{ARGUMENTS}}`:
 - **format**: `--format md|json` (default: md)
 - **personas_file**: `--personas <path>` (default: none)
 - **out_dir**: `--out <dir>` (default: `.focusgroup/{YYYY-MM-DD_HH-MM}`)
-- **deep**: `--deep` (default: false — enables full protocol phases)
+- **deep**: `--deep` (default: false — enables full protocol phases per reviewer)
+- **shallow**: `--shallow` (default: false — skips deep site crawl, NOT recommended for websites)
 - **methodology**: exactly one of `--delphi`, `--debate`, `--walkthrough "goal"`, `--compare url1 [url2] [url3]` (default: none)
 - **walkthrough_goal**: quoted text after `--walkthrough`
 - **compare_targets**: 1-3 non-flag args after `--compare` (warn and truncate if >3)
@@ -61,7 +62,7 @@ Announce: `[FOCUS GROUP] Target: {target} | Type: {type} | Panel: {panel} | Coun
 
 ---
 
-### Phase 2.5: Protocol & Probe Resolution
+### Phase 2.5: Deep Research & Protocol Resolution
 
 Select protocol paths based on input type:
 
@@ -72,8 +73,26 @@ Select protocol paths based on input type:
 | idea | `agents/protocols/idea-research-protocol.md` |
 | product | Both website and codebase protocols |
 
-**For website/product targets:** Run the website probe ONCE before reviews begin:
+**For website/product targets — MANDATORY DEEP RESEARCH (unless `--shallow`):**
 
+A homepage-only scrape is wildly incomplete. Most sites have subpages, linked products, published articles, and external properties that are invisible from the landing page alone. The research phase crawls everything so reviewers have complete information.
+
+**Step 1: Deep site crawl** (default for all website targets):
+```
+Agent(subagent_type="focusgroup:website-researcher", model="sonnet", prompt="
+TARGET: {target}
+Crawl the entire site following the research protocol in agents/probes/website-researcher.md.
+Visit ALL internal pages (up to 25). Follow outbound links to properties owned by the site owner.
+Read full text of all articles and blog posts. Run the technical JS probe.
+Write the complete dossier to: {out_dir}/site-dossier.md
+")
+```
+
+Read `{out_dir}/site-dossier.md` — this is the PRIMARY evidence source for all downstream agents.
+
+Announce: `[FOCUS GROUP] Deep research complete — site dossier written to {out_dir}/site-dossier.md`
+
+**Step 2: Technical probe** (supplementary, runs in parallel with step 1 if possible):
 ```
 Agent(subagent_type="focusgroup:website-probe", model="haiku", prompt="
 TARGET: {target}
@@ -81,7 +100,9 @@ Write probe results to: {out_dir}/probe-data.json
 ")
 ```
 
-Read `{out_dir}/probe-data.json` — this data will be passed to each reviewer.
+Read `{out_dir}/probe-data.json` — supplementary technical data passed to reviewers.
+
+**If `--shallow` is set:** Skip the deep crawl. Run only the probe. Note this limitation prominently in the synthesis.
 
 Select methodology protocol path if a methodology flag is set:
 
@@ -92,7 +113,7 @@ Select methodology protocol path if a methodology flag is set:
 | `--walkthrough` | `agents/methodologies/walkthrough-protocol.md` |
 | `--compare` | `agents/methodologies/comparative-protocol.md` |
 
-Announce: `[FOCUS GROUP] Protocol: {protocol_path} | Methodology: {methodology or 'standard'} | Deep: {yes/no}`
+Announce: `[FOCUS GROUP] Protocol: {protocol_path} | Methodology: {methodology or 'standard'} | Research: {deep/shallow}`
 
 ---
 
@@ -119,7 +140,16 @@ You are a Focus Group Director assembling a review panel.
 TARGET: {target} | INPUT TYPE: {input_type} | PANEL: {panel or 'auto'} | COUNT: {count}
 {If panel specified: Focus on {panel} concerns with some diversity.}
 {If auto: Generate diverse panel covering all important dimensions for this target.}
+
+{If website/product and dossier exists:}
+SITE DOSSIER: Read the dossier at {out_dir}/site-dossier.md FIRST.
+Use it to understand what the site actually contains — all pages, linked properties, articles,
+products, and services. Generate personas that represent the ACTUAL audiences for what you
+find in the dossier, not generic archetypes.
+
+{Otherwise:}
 Analyze the target thoroughly first (fetch pages, scan code, research domain).
+
 Then generate exactly {count} personas using [PERSONA:NN]...[/PERSONA] format.
 ")
 ```
@@ -168,9 +198,16 @@ PROTOCOL LOADING (MANDATORY):
 Read the protocol at {protocol_path} before starting. Follow every phase in order.
 {If product: Also read {second_protocol_path}.}
 
+{If website/product and dossier exists:}
+SITE DOSSIER: Read the file at {out_dir}/site-dossier.md using the Read tool BEFORE starting your review.
+This contains the complete crawl of all pages, linked properties, full article text, and technical data.
+This is your PRIMARY evidence source. Reference specific content from subpages, linked products,
+and articles — not just homepage content. If the dossier shows a live product exists, factor it in.
+If published research exists as a full article, evaluate its actual content.
+
 {If website/product and probe data exists:}
 PROBE DATA: {paste probe-data.json content}
-Use this as evidence. Do not re-run the probe.
+Use this as supplementary technical evidence. Do not re-run the probe.
 
 REVIEW INSTRUCTIONS:
 - Stay in character as {persona.name} throughout
@@ -270,7 +307,12 @@ You are the Focus Group Director synthesizing results of a multi-persona review.
 TARGET: {target} | PANEL: {panel} | COMPLETED: {N} of {count}
 {If any failed: 'FAILED: {list} — note gaps in synthesis.'}
 
-Read ALL review files in {out_dir}/ (##-*.md, NOT synthesis.md/meta.json).
+{If website/product:}
+Read the site dossier at {out_dir}/site-dossier.md FIRST.
+Use it to fact-check reviewer claims. If reviewers say 'there is no evidence of X'
+but the dossier shows X exists on a subpage or linked property, flag this discrepancy.
+
+Read ALL review files in {out_dir}/ (##-*.md, NOT synthesis.md/meta.json/site-dossier.md).
 Write synthesis to {out_dir}/synthesis.md with these sections:
 
 # Focus Group Synthesis
@@ -383,7 +425,8 @@ Read {out_dir}/synthesis.md for the full analysis.
 | Methodology protocol file missing | Fall back to standard single-round review; warn user |
 | Quality enforcer fails | Skip quality check for that review; note in meta.json |
 | Output generator fails | Skip that output; list what was generated in Phase 9 |
-| Website probe fails | Continue without probe data; reviewers use direct browsing |
+| Website researcher fails | Fall back to probe-only + direct browsing; warn that reviews may be shallow |
+| Website probe fails | Continue without probe data; reviewers use dossier + direct browsing |
 | --compare with no competitor URLs | Error: "--compare requires at least 1 competitor target" |
 
 ## Cancellation

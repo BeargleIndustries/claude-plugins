@@ -32,7 +32,8 @@ Multi-persona review system that dynamically generates diverse reviewer personal
 | `--format md\|json` | Output format | md |
 | `--personas <file>` | Custom persona definitions file | (auto-generated) |
 | `--out <dir>` | Output directory | .focusgroup/{timestamp} |
-| `--deep` | Use full multi-phase review protocols | (standard) |
+| `--deep` | Use full 8-phase review protocol per reviewer (on top of default deep research) | (standard) |
+| `--shallow` | Skip deep site crawl, use homepage-only (NOT recommended for websites) | (deep) |
 | `--delphi` | 3-round iterative Delphi method | (none) |
 | `--debate` | Red Team vs Blue Team structured debate | (none) |
 | `--walkthrough "goal"` | Cognitive walkthrough for a user goal | (none) |
@@ -58,10 +59,38 @@ Multi-persona review system that dynamically generates diverse reviewer personal
 
 ## Input Types
 
-- **Website**: URLs (http/https) — browser tools + optional deep 8-phase protocol
+- **Website**: URLs (http/https) — deep site crawl (all pages + linked properties) + browser tools + 8-phase protocol
 - **Codebase**: File paths — Read, Grep, Glob, LSP, AST + optional deep 9-phase protocol
 - **Product**: URL + local code — combines both approaches
 - **Idea**: Plain text — web search + optional 6-phase research protocol
+
+## Website Research (CRITICAL)
+
+For website targets, the orchestrator MUST run a deep research phase BEFORE generating personas or launching reviewers. A homepage-only scrape produces wildly incomplete reviews.
+
+### Research Phase (mandatory for all website targets)
+
+1. **Launch the website-researcher agent** (`agents/probes/website-researcher.md`) to crawl the entire site:
+   - Visit ALL internal pages (up to 25), not just the homepage
+   - Follow outbound links to properties OWNED by the site owner (products, apps, research)
+   - Read FULL text of all blog posts and articles
+   - Run the technical JS probe
+   - Output a comprehensive dossier to `.focusgroup/site-dossier.md`
+
+2. **Pass the dossier to ALL downstream agents:**
+   - The focus-director uses it to generate relevant personas
+   - Each focus-reviewer receives it as their primary evidence source
+   - The synthesis agent references it to verify reviewer claims
+
+### Why This Matters
+
+Without deep research:
+- Reviewers critique absence of things that actually exist on subpages
+- Products linked from the site are invisible to reviewers
+- Published research/articles are missed entirely
+- Reviews become shallow impressions of a homepage, not informed assessments
+
+The dossier is the foundation of review quality. Never skip it.
 
 ## Methodology Modes
 
