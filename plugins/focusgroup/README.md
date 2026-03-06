@@ -285,6 +285,7 @@ focusgroup/
     quality-enforcer.md           # Review quality validation (sonnet)
     probes/
       website-probe.md            # JavaScript diagnostic probe (haiku)
+      website-researcher.md       # Deep site crawl agent (sonnet)
     protocols/
       website-review-protocol.md  # 8-phase website exploration
       codebase-review-protocol.md # 9-phase codebase analysis
@@ -310,7 +311,6 @@ focusgroup/
     personas-accessibility.yaml   # Accessibility advocate personas
   README.md
   CONTRIBUTING.md
-  LICENSE
 ```
 
 ## Contributing
@@ -319,4 +319,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding new protocols, m
 
 ## License
 
-[MIT](LICENSE)
+[MIT](../../LICENSE)

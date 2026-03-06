@@ -8,7 +8,7 @@ Thanks for your interest in contributing!
 2. Clone your fork locally
 3. Install as a local Claude Code plugin:
    ```bash
-   ln -s /path/to/your/fork ~/.claude/plugins/local/focusgroup
+   claude plugin install /path/to/your/fork/plugins/focusgroup --scope local
    ```
 4. Make your changes
 5. Test by running `/focusgroup` in Claude Code
