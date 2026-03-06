@@ -1,0 +1,23 @@
+{
+  "name": "changelog",
+  "description": "Changelog generation with doc-vs-code consistency auditing. Generates changelogs from git history and catches documentation that doesn't match reality — wrong install instructions, outdated API examples, nonexistent CLI flags, and more.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Brad Leclerc",
+    "email": "brad@beargleindustries.com",
+    "url": "https://github.com/BeargleIndustries"
+  },
+  "license": "MIT",
+  "keywords": [
+    "changelog",
+    "documentation",
+    "doc-check",
+    "consistency",
+    "audit",
+    "git-log",
+    "release-notes",
+    "doc-drift",
+    "claude-code-plugin"
+  ],
+  "repository": "https://github.com/BeargleIndustries/claude-plugins"
+}

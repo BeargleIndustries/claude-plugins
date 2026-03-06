@@ -33,6 +33,27 @@
         "quality-control",
         "swot"
       ]
+    },
+    {
+      "name": "changelog",
+      "source": "./plugins/changelog",
+      "description": "Changelog generation with doc-vs-code consistency auditing. Catches wrong install instructions, outdated API examples, nonexistent CLI flags, and more.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Brad Leclerc",
+        "url": "https://github.com/BeargleIndustries"
+      },
+      "category": "Documentation",
+      "homepage": "https://github.com/BeargleIndustries/claude-plugins/tree/main/plugins/changelog",
+      "keywords": [
+        "changelog",
+        "documentation",
+        "doc-check",
+        "audit",
+        "consistency",
+        "doc-drift",
+        "release-notes"
+      ]
     }
   ]
 }

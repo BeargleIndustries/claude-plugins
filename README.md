@@ -7,6 +7,7 @@ A collection of Claude Code plugins by [Beargle Industries](https://github.com/B
 | Plugin | Description |
 |--------|-------------|
 | [focusgroup](plugins/focusgroup/) | AI-powered focus group reviews with deep protocols, advanced methodologies, quality control, and rich output formats |
+| [changelog](plugins/changelog/) | Changelog generation with doc-vs-code consistency auditing — catches wrong install instructions, outdated API examples, nonexistent CLI flags, and more |
 
 ## Install
 
